@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:tx="http://www.springframework.org/schema/tx" xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/aop
+        http://www.springframework.org/schema/aop/spring-aop.xsd
+        http://www.springframework.org/schema/tx
+        http://www.springframework.org/schema/tx/spring-tx.xsd
+        http://www.springframework.org/schema/mvc
+        http://www.springframework.org/schema/mvc/spring-mvc.xsd">
+    <!-- 配一个control的扫描器 .....配合注解使用.....base-package=""配置control层包 -->
+    <!-- 在springMVC的基础上扩大扫描范围 -->
+    <context:component-scan base-package="com.zhiyou"></context:component-scan>
+
+
+    <!-- 1、配置连接池 -->
+    <bean class="com.mchange.v2.c3p0.ComboPooledDataSource" name="dataSource">
+        <property name="driverClass" value="com.mysql.jdbc.Driver"/>
+        <property name="jdbcUrl" value="jdbc:mysql://localhost:3306/national_tax"/>
+        <property name="user" value="root"/>
+        <property name="password" value="123456"/>
+        <property name="maxPoolSize" value="10"/>
+        <property name="minPoolSize" value="2"/>
+    </bean>
+
+    <!-- 2、配置会话session工厂 -->
+    <bean name="sessionFactory" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="hibernateProperties">
+            <value>
+                hibernate.dialect = org.hibernate.dialect.MySQLDialect<!-- 方言 -->
+                hibernate.show_sql = true<!-- 显示sql语句 -->
+                hibernate.format_sql = true<!-- 格式化sql -->
+                hibernate.hbm2ddl.auto = update<!-- 反向生成 -->
+                hibernate.current_session_context_class =
+                org.springframework.orm.hibernate4.SpringSessionContext<!-- 开启getCurrentSession -->
+            </value>
+        </property>
+        <property name="mappingResources"> <!-- 引入hbm映射 -->
+            <list>
+                <value>com/zhiyou/mapping/User.hbm.xml</value>
+                <value>com/zhiyou/mapping/Info.hbm.xml</value>
+                <value>com/zhiyou/mapping/UserRole.hbm.xml</value>
+                <value>com/zhiyou/mapping/Role.hbm.xml</value>
+                <value>com/zhiyou/mapping/Complain.hbm.xml</value>
+                <value>com/zhiyou/mapping/RolePrivilege.hbm.xml</value>
+                <value>com/zhiyou/mapping/ComplainReply.hbm.xml</value>
+            </list>
+        </property>
+    </bean>
+
+    <!-- 3、配置hibernate事务管理  注意：根据jar包把版本改成4的 -->
+    <bean name="transactionManager" class="org.springframework.orm.hibernate4.HibernateTransactionManager">
+        <property name="sessionFactory" ref="sessionFactory"></property>
+    </bean>
+
+    <!-- 4、配置aop(面向切面编程)事务 -->
+    <aop:config><!-- 对com.zhiyou.service.impl包下的任意类任意方法 都加事务，确定这些为切点-->
+        <aop:pointcut expression="execution(public * com.zhiyou.service.impl.*.*(..))" id="myPointCut"/>
+        <!-- 连接切点和切面 -->
+        <aop:advisor advice-ref="myAdvice" pointcut-ref="myPointCut"/>
+    </aop:config>
+    <!-- 切面上的建议 针对service层以select，delete等开头的方法生效 -->
+    <tx:advice id="myAdvice" transaction-manager="transactionManager">
+        <tx:attributes>
+            <tx:method name="select*" read-only="true"/>
+            <tx:method name="get*" read-only="true"/>
+            <tx:method name="delete*"/>
+            <tx:method name="update*"/>
+            <tx:method name="save*"/>
+        </tx:attributes>
+    </tx:advice>
+    <!-- 例如在com.zhiyou.service.impl.UserServiceImpl.saveUser() 会在该方法执行前开启事务，该方法执行后提交事务 -->
+
+    <!-- 将job-timer.xml引入进来 -->
+    <import resource="classpath*:job-timer.xml"/>
+</beans>  
+
+
+
+

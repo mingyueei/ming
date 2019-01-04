@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+        "-//Apache Software Foundation//DTD Struts Configuration 2.3//EN"
+        "http://struts.apache.org/dtds/struts-2.3.dtd">
+
+<struts>
+    <!-- struts2的常量配置 -->
+    <!-- 开启开发者模式 -->
+    <!-- <constant name="struts.devMode" value="true"></constant> -->
+    <!-- 开启自动刷新 -->
+    <!-- <constant name="struts.configuration.xml.reload" value="true"></constant> -->
+
+    <package name="myPackage1" namespace="/sys" extends="json-default">
+
+        <action name="login_toLoginUI" class="com.zhiyou.controller.UserController" method="login">
+            <result name="login" type="dispatcher">/WEB-INF/jsp/loginUI.jsp</result>
+        </action>
+
+        <action name="login_login" class="com.zhiyou.controller.UserController" method="selectByAccount">
+            <result name="selectByAccount" type="dispatcher">/WEB-INF/jsp/home/home.jsp</result>
+            <result name="error" type="dispatcher">/WEB-INF/jsp/loginUI.jsp</result>
+        </action>
+
+        <action name="home" class="com.zhiyou.controller.UserController" method="goHome">
+            <result name="success" type="dispatcher">/WEB-INF/jsp/home/home.jsp</result>
+        </action>
+
+        <action name="home_infoViewUI" class="com.zhiyou.controller.InfoController" method="infoViewUI">
+            <result name="success" type="dispatcher">/WEB-INF/jsp/home/infoViewUI.jsp</result>
+        </action>
+
+        <action name="home_*" class="com.zhiyou.controller.ComplainController" method="{1}">
+            <result name="success" type="dispatcher">/WEB-INF/jsp/home/{1}.jsp</result>
+        </action>
+
+        <action name="home_getUserJson2" class="com.zhiyou.controller.ComplainController" method="getUserJson2">
+            <result name="success" type="json"></result>
+        </action>
+        <action name="home_complainAdd" class="com.zhiyou.controller.ComplainController" method="complainAdd">
+            <result name="success" type="json"></result>
+        </action>
+
+        <action name="login_logout" class="com.zhiyou.controller.UserController" method="logout">
+            <result name="success" type="dispatcher">/WEB-INF/jsp/loginUI.jsp</result>
+        </action>
+    </package>
+    <!-- 去到纳税服务 --><!-- 角色管理 -->
+    <package name="myPackage2" namespace="/nsfw" extends="json-default">
+        <action name="home_*" class="com.zhiyou.controller.UserController" method="{1}">
+            <result name="success" type="dispatcher">/WEB-INF/jsp/nsfw/{1}.jsp</result>
+        </action>
+        <action name="user_*" class="com.zhiyou.controller.UserController" method="{1}">
+            <result name="success" type="dispatcher">/WEB-INF/jsp/nsfw/user/{1}.jsp</result>
+            <result name="success2" type="chain">
+                <param name="actionName">user_listUI</param>
+            </result>
+            <!-- <result name="exportExcel" type="stream">
+                <param name="contentType">application/vnd.ms-excel</param>
+                <param name= " inputName"> excelStream</param>
+                <param name="contentDisposition">attachment;filename=" ${fileName}.xls"</param>
+                <param name="bufferSize">1024</param>
+            </result> -->
+
+        </action>
+        <action name="user_verifyAccount" class="com.zhiyou.controller.UserController" method="verifyAccount">
+            <result type="json"></result>
+        </action>
+        <action name="role_*" class="com.zhiyou.controller.RoleController" method="{1}">
+            <result name="success" type="dispatcher">/WEB-INF/jsp/nsfw/role/{1}.jsp</result>
+            <result name="success2" type="chain">
+                <param name="actionName">role_listUI</param>
+            </result>
+        </action>
+
+        <action name="info_*" class="com.zhiyou.controller.InfoController" method="{1}">
+            <result name="success" type="dispatcher">/WEB-INF/jsp/nsfw/info/{1}.jsp</result>
+            <result name="success2" type="chain">info_listUI</result>
+        </action>
+        <action name="info_publicInfo" class="com.zhiyou.controller.InfoController" method="doPublic">
+            <result name="success" type="json"></result>
+        </action>
+
+        <action name="complain_*" class="com.zhiyou.controller.ComplainController" method="{1}">
+            <result name="success" type="dispatcher">/WEB-INF/jsp/nsfw/complain/{1}.jsp</result>
+        </action>
+        <action name="complain_deal" class="com.zhiyou.controller.ComplainController" method="deal">
+            <result name="success" type="chain">complain_listUI</result>
+        </action>
+        <action name="complain_getAnnualStatisticData" class="com.zhiyou.controller.ComplainController"
+                method="getAnnualStatisticData">
+            <result name="success" type="json">
+                <param name="root">statisticMap</param>
+            </result>
+        </action>
+    </package>
+
+
+</struts>
